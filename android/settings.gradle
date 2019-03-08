@@ -1,0 +1,3 @@
+rootProject.name = 'rnf_google'
+
+include ':app'
