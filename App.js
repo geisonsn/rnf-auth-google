@@ -1,30 +1,56 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- * @lint-ignore-every XPLATJSCOPYRIGHT1
- */
-
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
+import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+export default class App extends Component {
+  
+  constructor() {
+    super()
+    this.state = {userInfo: null, error: '', userText: null};
+    GoogleSignin.configure();
+  }
 
-type Props = {};
-export default class App extends Component<Props> {
+  signIn = () => {
+    this.setState({ error: 'Testando'});
+  }
+
+  signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      
+      const userInfo = await GoogleSignin.signIn();
+
+      console.warn(userInfo);
+      this.setState({ userInfo });
+      this.setState({userText: JSON.stringify(userInfo)});
+
+      // console.warn(userInfo);
+    } catch (error) {
+
+      // console.warn(error.code);
+      // console.log(error);
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+        // console.warn(error);
+      } else {
+        // some other error happened
+      }
+    }
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        <GoogleSigninButton
+          style={{ width: 192, height: 48 }}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={this.signIn}/>
+        <Text>{this.state.userText}</Text>
       </View>
     );
   }
@@ -36,15 +62,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
   },
 });
